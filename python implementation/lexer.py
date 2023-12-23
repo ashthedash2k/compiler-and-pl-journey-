@@ -5,7 +5,6 @@ TO ADD:
 - comments
 - lol fix error message
 - boolean (true false, and or ?)
-- floats
 - line and column tracking
 '''
 
@@ -18,6 +17,7 @@ class Lexer:
         self.input = input_data
         self.position = 0
         self.tokens = []
+        self.type = ''
     def next_char(self):
         if self.position + 1 < len(self.input):
             return self.input[self.position + 1]
@@ -75,16 +75,27 @@ class Lexer:
                 self.position += 1
             #lol fix positioning its messed up
             elif char.isdigit():
-                self.tokens.append(('INTEGER', self.read_integer(), self.position))
+                number_value = self.read_number()
+                token_type = 'FLOAT' if '.' in number_value else 'INTEGER'
+                self.tokens.append((token_type, number_value, self.position))
             else:
                 raise Error(self.position)
 
         return self.tokens
 
-    def read_integer(self):
+    # def read_integer(self):
+    #     start_position = self.position
+    #     while self.position < len(self.input) and self.input[self.position].isdigit():
+    #         self.position += 1
+    #     return self.input[start_position:self.position]
+
+    def read_number(self):
         start_position = self.position
-        while self.position < len(self.input) and self.input[self.position].isdigit():
-            self.position += 1
+        while self.position < len(self.input):
+            if self.input[self.position].isdigit():
+                self.position += 1
+            elif self.input[self.position] == '.':
+                self.position += 1
         return self.input[start_position:self.position]
     
     def read_string(self, identifier):
@@ -102,10 +113,7 @@ class Lexer:
 
         return inside_identifier 
 
-
-
-
-data = '=='
+data = '4'
 lexer = Lexer(data)
 tokens = lexer.tokenize()
 print(tokens)
