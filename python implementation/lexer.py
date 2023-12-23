@@ -1,14 +1,9 @@
 
 '''
 TO ADD: 
-- comments
-- lol fix error message
+- multi line comments
 - line and column tracking
 '''
-class Error:
-    def __init__(self, pos):
-        self.pos = pos
-
 class Lexer:
     def __init__(self, input_data):
         self.input = input_data
@@ -76,7 +71,6 @@ class Lexer:
             elif char == '/':
                 self.tokens.append(('REG DIV', char))
                 self.position += 1
-            #lol fix positioning its messed up
             elif char.isdigit():
                 number_value = self.read_number()
                 token_type = 'FLOAT' if '.' in number_value else 'INTEGER'
@@ -90,8 +84,7 @@ class Lexer:
                 else: 
                     self.tokens.append(('STRING', identifier))
             else:
-                raise Error(self.position)
-
+                raise ValueError("cannot parse: ", char)
         return self.tokens
     
     def read_identifier(self):
