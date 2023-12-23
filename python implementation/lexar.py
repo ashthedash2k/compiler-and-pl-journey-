@@ -21,8 +21,9 @@ class Lexer:
                 self.position += 1
             elif char == '*':
                 self.tokens.append(('MULT', char))
+                self.position += 1
             elif char.isdigit():
-                self.tokens.append(('INTEGER', self._read_integer()))
+                self.tokens.append(('INTEGER', self.read_integer()))
             else:
                 raise Exception(f"Illegal character: {char}")
 
