@@ -1,4 +1,8 @@
 
+class Error:
+    def __init__(self, pos):
+        self.pos = pos
+
 class Lexer:
     def __init__(self, input_data):
         self.input = input_data
@@ -11,27 +15,25 @@ class Lexer:
             if char in [' ', '\t', '\n', '\r']:
                 self.position += 1
             elif char == '+':
-                self.tokens.append(('PLUS', char))
+                self.tokens.append(('PLUS', char, self.position))
                 self.position += 1
             elif char == '(':
-                self.tokens.append(('LPAREN', char))
+                self.tokens.append(('LPAREN', char, self.position))
                 self.position += 1
             elif char == ')':
-                self.tokens.append(('RPAREN', char))
+                self.tokens.append(('RPAREN', char, self.position))
                 self.position += 1
             elif char == '*':
-                self.tokens.append(('MULT', char))
+                self.tokens.append(('MULT', char, self.position))
                 self.position += 1
             elif char == '/':
-                self.tokens.append(('REG DIV', char))
+                self.tokens.append(('REG DIV', char, self.position))
                 self.position += 1
-            elif char == '//':
-                self.tokens.append(('FLOOR DIV', char))
-                self.position += 1
+            #lol fix positioning its messed up
             elif char.isdigit():
-                self.tokens.append(('INTEGER', self.read_integer()))
+                self.tokens.append(('INTEGER', self.read_integer(), self.position))
             else:
-                raise Exception(f"Illegal character: {char}")
+                raise Error(self.position)
 
         return self.tokens
 
@@ -42,7 +44,7 @@ class Lexer:
         return self.input[start_position:self.position]
 
 
-data = "hi"
+data = "1+2+3+4/4"
 lexer = Lexer(data)
 tokens = lexer.tokenize()
 print(tokens)
