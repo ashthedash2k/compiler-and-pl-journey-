@@ -42,7 +42,7 @@ class Lexer:
         return self.input[start_position:self.position]
 
 
-data = "3 + (4 + 5) * 9 + 10 / 55"
+data = "hi"
 lexer = Lexer(data)
 tokens = lexer.tokenize()
 print(tokens)
