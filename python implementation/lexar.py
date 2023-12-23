@@ -22,6 +22,12 @@ class Lexer:
             elif char == '*':
                 self.tokens.append(('MULT', char))
                 self.position += 1
+            elif char == '/':
+                self.tokens.append(('REG DIV', char))
+                self.position += 1
+            elif char == '//':
+                self.tokens.append(('FLOOR DIV', char))
+                self.position += 1
             elif char.isdigit():
                 self.tokens.append(('INTEGER', self.read_integer()))
             else:
@@ -36,7 +42,7 @@ class Lexer:
         return self.input[start_position:self.position]
 
 
-data = "3 + (4 + 5) * 9 + 10"
+data = "3 + (4 + 5) * 9 + 10 / 55"
 lexer = Lexer(data)
 tokens = lexer.tokenize()
 print(tokens)
