@@ -14,6 +14,9 @@ class Lexer:
             char = self.input[self.position]
             if char in [' ', '\t', '\n', '\r']:
                 self.position += 1
+            elif char in ['"', "'"]: 
+                string_value = self.read_string(char)
+                self.tokens.append(('STRING', string_value, self.position))
             elif char == '+':
                 self.tokens.append(('PLUS', char, self.position))
                 self.position += 1
@@ -42,9 +45,26 @@ class Lexer:
         while self.position < len(self.input) and self.input[self.position].isdigit():
             self.position += 1
         return self.input[start_position:self.position]
+    
+    def read_string(self, identifier):
+        self.position += 1 
+        inside_identifier = ""
+
+        while self.position < len(self.input):
+            char = self.input[self.position]
+            if char == identifier:
+                break
+            else:
+                inside_identifier += char
+                self.position += 1
+        self.position += 1
+
+        return inside_identifier 
 
 
-data = "1+2+3+4/4"
+
+
+data = '1+2+"hello world"+\'test string\'+3+4/4'
 lexer = Lexer(data)
 tokens = lexer.tokenize()
 print(tokens)
