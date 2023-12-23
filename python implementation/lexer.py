@@ -3,6 +3,7 @@
 TO ADD: 
 - multi line comments
 - line and column tracking
+- lol comment and add some like header explaining ur code 
 '''
 class Lexer:
     def __init__(self, input_data):
