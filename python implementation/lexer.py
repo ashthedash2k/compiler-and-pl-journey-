@@ -1,10 +1,8 @@
 
 '''
 TO ADD: 
-- keywords
 - comments
 - lol fix error message
-- boolean (true false, and or ?)
 - line and column tracking
 '''
 class Error:
@@ -61,6 +59,8 @@ class Lexer:
             elif char == '>':
                 self.tokens.append(('GREATER THAN', char))
                 self.position += 1
+            elif char == '#':
+                self.tokens.append(('COMMENT', self.read_sl_comment()))
             elif char == '+':
                 self.tokens.append(('PLUS', char))
                 self.position += 1
@@ -89,7 +89,6 @@ class Lexer:
                     self.tokens.append((self.logic[identifier], identifier))
                 else: 
                     self.tokens.append(('STRING', identifier))
-
             else:
                 raise Error(self.position)
 
@@ -97,7 +96,7 @@ class Lexer:
     
     def read_identifier(self):
         start_position = self.position
-        while self.position < len(self.input) and (self.input[self.position].isalnum() or self.input[self.position] == '_'):
+        while self.position < len(self.input) and (self.input[self.position].isalnum()):
             self.position += 1
         return self.input[start_position:self.position]
 
@@ -109,8 +108,15 @@ class Lexer:
             elif self.input[self.position] == '.':
                 self.position += 1
         return self.input[start_position:self.position]
+    
+    #single line comments
+    def read_sl_comment(self):
+        start_position = self.position
+        while self.position < len(self.input) and self.input[self.position] != '\n':
+            self.position += 1
+        return self.input[start_position:self.position]
 
-data = 'for True hey if 1222'
+data = '#hey'
 lexer = Lexer(data)
 tokens = lexer.tokenize()
 print(tokens)
