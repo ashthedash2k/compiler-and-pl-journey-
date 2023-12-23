@@ -1,4 +1,14 @@
 
+'''
+TO ADD: 
+- keywords
+- comments
+- lol fix error message
+- boolean (true false, and or ?)
+- floats
+- line and column tracking
+'''
+
 class Error:
     def __init__(self, pos):
         self.pos = pos
@@ -8,6 +18,10 @@ class Lexer:
         self.input = input_data
         self.position = 0
         self.tokens = []
+    def next_char(self):
+        if self.position + 1 < len(self.input):
+            return self.input[self.position + 1]
+        return ''
 
     def tokenize(self):
         while self.position < len(self.input):
@@ -17,6 +31,33 @@ class Lexer:
             elif char in ['"', "'"]: 
                 string_value = self.read_string(char)
                 self.tokens.append(('STRING', string_value, self.position))
+            elif char == '=' and self.next_char() == '=':
+                self.tokens.append(('EQUALS (bool)', '==', self.position))
+                self.position += 2
+            elif char == '!' and self.next_char() == '=':
+                self.tokens.append(('NOT EQUAL (bool)', '!=', self.position))
+                self.position += 2
+            elif char == '<' and self.next_char() == '=':
+                self.tokens.append(('LESS THAN EQUAL', '<=', self.position))
+                self.position += 2
+            elif char == '>' and self.next_char() == '=':
+                self.tokens.append(('GREATER THAN EQUAL', '>=', self.position))
+                self.position += 2
+            elif char == '=':
+                self.tokens.append(('EQUALS (assignment)', char, self.position))
+                self.position += 1
+            elif char == '-':
+                self.tokens.append(('MINUS', char, self.position))
+                self.position += 1
+            elif char == '%':
+                self.tokens.append(('MOD', char, self.position))
+                self.position += 1
+            elif char == '<':
+                self.tokens.append(('LESS THAN', char, self.position))
+                self.position += 1
+            elif char == '>':
+                self.tokens.append(('GREATER THAN', char, self.position))
+                self.position += 1
             elif char == '+':
                 self.tokens.append(('PLUS', char, self.position))
                 self.position += 1
@@ -64,7 +105,7 @@ class Lexer:
 
 
 
-data = '1+2+"hello world"+\'test string\'+3+4/4'
+data = '=='
 lexer = Lexer(data)
 tokens = lexer.tokenize()
 print(tokens)
