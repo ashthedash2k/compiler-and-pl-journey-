@@ -23,6 +23,7 @@ class Lexer:
     def tokenize(self):
         while self.position < len(self.input):
             char = self.input[self.position]
+            print(f"Processing character: {char}")
             if char in [' ', '\t', '\n', '\r']:
                 self.position += 1
             elif char in ['"', "'"]: 
@@ -96,11 +97,18 @@ class Lexer:
 
     def read_number(self):
         start_position = self.position
+        is_dot = False
         while self.position < len(self.input):
             if self.input[self.position].isdigit():
                 self.position += 1
             elif self.input[self.position] == '.':
+                #need this check for like 1.2.3 or other weird invalid instances
+                if is_dot:
+                    break
+                is_dot = True
                 self.position += 1
+            else: #break if non character
+                break
         return self.input[start_position:self.position]
     
     #single line comments
@@ -110,7 +118,7 @@ class Lexer:
             self.position += 1
         return self.input[start_position:self.position]
 
-# data = '#hey'
-# lexer = Lexer(data)
-# tokens = lexer.tokenize()
-# print(tokens)
+data = '1 + 2 + 3'
+lexer = Lexer(data)
+tokens = lexer.tokenize()
+print(tokens)

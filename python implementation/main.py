@@ -11,7 +11,6 @@ def read_file(file_path):
 def main():
     file_path = '/Users/ashthedash/compiler_journey/python implementation/code.txt'
     code = read_file(file_path)
-    
+
 if __name__ == "__main__":
     main()
-5
