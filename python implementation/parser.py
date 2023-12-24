@@ -17,13 +17,26 @@ class Parser:
     def parse(self):
         return self.plus_minus()
 
-    def plus_minus(self):
-        node = self.mult_div()
-        while self.current_token and self.current_token[0] in ['PLUS', 'MINUS']:
+    
+    def compare(self, left_node):
+        while self.current_token and self.current_token[0] in ['GREATER THAN', 'LESS THAN', 'GREATER THAN EQUAL', 'LESS THAN EQUAL']:
             op = self.current_token[0]
             self.next_token()
             right_node = self.mult_div()
-            node = Node(op, node, right_node)
+            left_node = Node(op, left_node, right_node)
+        return left_node
+
+    def plus_minus(self):
+        node = self.mult_div()
+        while self.current_token:
+            if self.current_token[0] in ['PLUS', 'MINUS']:
+                op = self.current_token[0]
+                self.next_token()
+                node = Node(op, node, self.mult_div())
+            elif self.current_token[0] in ['GREATER THAN', 'LESS THAN', 'GREATER THAN EQUAL', 'LESS THAN EQUAL']:
+                return self.compare(node)
+            else:
+                break
         return node
 
     def mult_div(self):
@@ -66,8 +79,17 @@ def evaluate(node):
         return evaluate(node.left) * evaluate(node.right)
     elif node.value == 'DIV':
         return evaluate(node.left) / evaluate(node.right)
+    elif node.value == 'GREATER THAN':
+        return evaluate(node.left) > evaluate(node.right)
+    elif node.value == 'LESS THAN':
+        return evaluate(node.left) < evaluate(node.right)
+    elif node.value == 'GREATER THAN EQUAL':
+        return evaluate(node.left) >= evaluate(node.right)
+    elif node.value == 'LESS THAN EQUAL':
+        return evaluate(node.left) <= evaluate(node.right)
 
-data = "3 + 2 * (4 + 5)"
+
+data = " 9 > 111 "
 lexer = Lexer(data)
 tokens = lexer.tokenize()
 parser = Parser(tokens)
