@@ -75,7 +75,10 @@ class Lexer:
                 self.position += 1
             elif char.isdigit():
                 number_value = self.read_number()
-                token_type = 'FLOAT' if '.' in number_value else 'INTEGER'
+                if '.' in number_value:
+                    token_type = 'FLOAT'
+                else:
+                    token_type = 'INTEGER'
                 self.tokens.append((token_type, number_value))
             elif char.isalpha() or char == '_':
                 identifier = self.read_identifier()
@@ -118,7 +121,7 @@ class Lexer:
             self.position += 1
         return self.input[start_position:self.position]
 
-data = '1 + 2 + 3'
-lexer = Lexer(data)
-tokens = lexer.tokenize()
-print(tokens)
+# data = '-9'
+# lexer = Lexer(data)
+# tokens = lexer.tokenize()
+# print(tokens)

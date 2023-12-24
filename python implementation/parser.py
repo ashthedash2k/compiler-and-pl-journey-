@@ -4,6 +4,15 @@ class Node:
         self.value = value  
         self.left = left   
         self.right = right  
+    
+    def print_tree(self, level=0, prefix=""):
+        indent = "    " * level
+        branch = "|-- " if level > 0 else ""
+        print(indent + prefix + branch + str(self.value))
+        if self.left:
+            self.left.print_tree(level + 1, "L")
+        if self.right:
+            self.right.print_tree(level + 1, "R")
 
 class Parser:
     def __init__(self, tokens):
@@ -68,6 +77,8 @@ class Parser:
         else:
             raise SyntaxError("Expected number or '('")
 
+
+
 def evaluate(node):
     if isinstance(node.value, (float, int)):
         return node.value
@@ -89,10 +100,12 @@ def evaluate(node):
         return evaluate(node.left) <= evaluate(node.right)
 
 
-data = " 9 > 111 "
+data = " 1 + 2 * (3 * 9) "
 lexer = Lexer(data)
 tokens = lexer.tokenize()
 parser = Parser(tokens)
 graph = parser.parse()
+graph.print_tree()
 result = evaluate(graph)
+
 print(f"Parser returns: {result}")
