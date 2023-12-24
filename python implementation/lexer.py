@@ -23,7 +23,7 @@ class Lexer:
     def tokenize(self):
         while self.position < len(self.input):
             char = self.input[self.position]
-            print(f"Processing character: {char}")
+            #print(f"Processing character: {char}")
             if char in [' ', '\t', '\n', '\r']:
                 self.position += 1
             elif char in ['"', "'"]: 
