@@ -18,6 +18,7 @@ class Parser:
     def __init__(self, tokens):
         self.tokens = iter(tokens)
         self.current_token = None
+        self.symbol_table = {}
         self.next_token()
 
     def next_token(self):
@@ -58,54 +59,71 @@ class Parser:
         return node
 
     def breakdown(self):
-        if self.current_token and self.current_token[0] in ['INTEGER', 'FLOAT']:
-            if self.current_token[0] == 'FLOAT':
-                value = float(self.current_token[1])
-            elif self.current_token[0] == 'INTEGER':
-                value = int(self.current_token[1])
-            node = Node(value)
+        if self.current_token and self.current_token[0] == 'STRING':
+            var_name = self.current_token[1]
             self.next_token()
-            return node
+            if self.current_token and self.current_token[0] == 'EQUALS (assignment)':
+                self.next_token()
+                value_node = self.plus_minus() 
+                self.symbol_table[var_name] = self.evaluate(value_node)  
+                return Node('ASSIGNMENT', Node(var_name), value_node)
+            else:
+                if var_name in self.symbol_table:
+                    return Node(self.symbol_table[var_name])
+                else:
+                    raise NameError(f"Undefined variable: {var_name}")
         elif self.current_token and self.current_token[0] == 'LPAREN':
             self.next_token()
             node = self.plus_minus()
             if self.current_token and self.current_token[0] == 'RPAREN':
                 self.next_token()
                 return node
-            else:
-                raise SyntaxError("Expected ')'")
+        elif self.current_token and (self.current_token[0] == 'INTEGER' or self.current_token[0] == 'FLOAT'):
+            value = float(self.current_token[1]) if self.current_token[0] == 'FLOAT' else int(self.current_token[1])
+            node = Node(value)
+            self.next_token()
+            return node
         else:
-            raise SyntaxError("Expected number or '('")
+            raise SyntaxError("Expected number, '(', or variable assignment")
 
 
 
-def evaluate(node):
-    if isinstance(node.value, (float, int)):
-        return node.value
-    elif node.value == 'PLUS':
-        return evaluate(node.left) + evaluate(node.right)
-    elif node.value == 'MINUS':
-        return evaluate(node.left) - evaluate(node.right)
-    elif node.value == 'MULT':
-        return evaluate(node.left) * evaluate(node.right)
-    elif node.value == 'DIV':
-        return evaluate(node.left) / evaluate(node.right)
-    elif node.value == 'GREATER THAN':
-        return evaluate(node.left) > evaluate(node.right)
-    elif node.value == 'LESS THAN':
-        return evaluate(node.left) < evaluate(node.right)
-    elif node.value == 'GREATER THAN EQUAL':
-        return evaluate(node.left) >= evaluate(node.right)
-    elif node.value == 'LESS THAN EQUAL':
-        return evaluate(node.left) <= evaluate(node.right)
+    def evaluate(self, node):
+        if isinstance(node.value, (float, int)):
+            return node.value
+        elif node.value == 'PLUS':
+            return self.evaluate(node.left) + self.evaluate(node.right)
+        elif node.value == 'MINUS':
+            return self.evaluate(node.left) - self.evaluate(node.right)
+        elif node.value == 'MULT':
+            return self.evaluate(node.left) * self.evaluate(node.right)
+        elif node.value == 'DIV':
+            return self.evaluate(node.left) / self.evaluate(node.right)
+        elif node.value == 'GREATER THAN':
+            return self.evaluate(node.left) > self.evaluate(node.right)
+        elif node.value == 'LESS THAN':
+            return self.evaluate(node.left) < self.evaluate(node.right)
+        elif node.value == 'GREATER THAN EQUAL':
+            return self.evaluate(node.left) >= self.evaluate(node.right)
+        elif node.value == 'LESS THAN EQUAL':
+            return self.evaluate(node.left) <= self.evaluate(node.right)
+        elif node.value == 'ASSIGNMENT':
+            variable_name = node.left.value
+            assigned_value = self.evaluate(node.right)
+            self.symbol_table[variable_name] = assigned_value
+            return assigned_value
+        else:
+            if node.value in self.symbol_table:
+                return self.symbol_table[node.value]
+            else:
+                raise NameError(f"Undefined variable: {node.value}")
 
 
-data = " 1 + 2 * (3 * 9) "
+data = "cat = 9 + 6"
 lexer = Lexer(data)
 tokens = lexer.tokenize()
 parser = Parser(tokens)
 graph = parser.parse()
 graph.print_tree()
-result = evaluate(graph)
-
+result = parser.evaluate(graph)
 print(f"Parser returns: {result}")

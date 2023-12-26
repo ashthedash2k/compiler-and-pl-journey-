@@ -121,7 +121,7 @@ class Lexer:
             self.position += 1
         return self.input[start_position:self.position]
 
-# data = '-9'
+# data = 'cat '
 # lexer = Lexer(data)
 # tokens = lexer.tokenize()
 # print(tokens)
