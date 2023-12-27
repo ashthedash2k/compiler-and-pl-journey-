@@ -27,7 +27,6 @@ class Parser:
     def parse(self):
         return self.plus_minus()
 
-    
     def compare(self, left_node):
         while self.current_token and self.current_token[0] in ['GREATER THAN', 'LESS THAN', 'GREATER THAN EQUAL', 'LESS THAN EQUAL']:
             op = self.current_token[0]
@@ -86,8 +85,6 @@ class Parser:
         else:
             raise SyntaxError("Expected number, '(', or variable assignment")
 
-
-
     def evaluate(self, node):
         if isinstance(node.value, (float, int)):
             return node.value
@@ -117,13 +114,37 @@ class Parser:
                 return self.symbol_table[node.value]
             else:
                 raise NameError(f"Undefined variable: {node.value}")
+    
+    def assembly(self, node):
+        asm = []
+        if node.value == None:
+            return asm
+
+        if isinstance(node.value, int):
+            asm.append(f"mov eax, {node.value}")  
+        elif node.value == 'PLUS':
+            asm += self.assembly(node.left)
+            if isinstance(node.right.value, int):
+                asm.append(f"add eax, {node.right.value}")
+            else:
+                pass
+        return asm
 
 
-data = "cat = 9 + 6"
+
+data = "3 + 3 + 9"
 lexer = Lexer(data)
 tokens = lexer.tokenize()
 parser = Parser(tokens)
-graph = parser.parse()
-graph.print_tree()
-result = parser.evaluate(graph)
-print(f"Parser returns: {result}")
+
+try:
+    graph = parser.parse()
+    graph.print_tree()
+    result = parser.evaluate(graph)
+    print(f"Parser returns: {result}")
+    print(f'Symbol table values: {parser.symbol_table}')
+
+    assembly_code = parser.assembly(graph)
+    print("\n".join(assembly_code))
+except SyntaxError as e:
+    print(f"Syntax error in parsing: {e}")
