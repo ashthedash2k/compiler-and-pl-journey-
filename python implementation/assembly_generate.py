@@ -31,6 +31,30 @@ class AssemblyGenerator:
         else:
             raise Exception("No registers to spill")
         
+    
+    def push_to_stack(self, reg):
+        self.stack.append(reg)
+        return f"push {reg}"
+
+    def pop_from_stack(self, reg):
+        self.stack.remove(reg)
+        return f"pop {reg}"
+
+    def increase_rsp(self, value):
+        return f"add rsp, {value}"
+
+    def decrease_rsp(self, value):
+        return f"sub rsp, {value}"
+    
+    def print_stack(self):
+        if not self.stack:
+            print("Stack is empty.")
+            return
+
+        print("Stack contents (top to bottom):")
+        for item in reversed(self.stack):
+            print(item)
+
     def assembly(self, node):
         asm = []
         if node is None:
@@ -42,31 +66,26 @@ class AssemblyGenerator:
         elif node.value in ['PLUS', 'MINUS', 'MULT', 'DIV']:
             if node.left:
                 left_asm = self.assembly(node.left)
-            else: 
-                left_asm = []
-            
-            asm.extend(left_asm)
-            if left_asm: 
+                asm.extend(left_asm)
                 left_reg = self.used_registers[-1]
-            else: 
-                left_reg = None
-            
+            else:
+                raise Exception("Missing left operand")
+
             if node.right:
                 right_asm = self.assembly(node.right)
-            else: 
-                right_asm = []
-
-            asm.extend(right_asm)
-
-            if right_asm: 
+                asm.extend(right_asm)
                 right_reg = self.used_registers[-1]
-            else: 
-                right_reg = None
-            
-            if left_reg and right_reg:
-                if node.value == 'PLUS':
-                    asm.append(f"add {left_reg}, {right_reg}")
-                    self.release_register(right_reg)
+            else:
+                raise Exception("Missing right operand")
+
+            asm.append(self.push_to_stack(right_reg))
+            self.release_register(right_reg)
+
+            if node.value == 'PLUS':
+                asm.append(f"add {left_reg}, [rsp]")  
+
+            asm.append(self.pop_from_stack(right_reg)) 
+
         return asm
 
 data = "(5 + 2) + (6 + 7)"
@@ -83,6 +102,7 @@ try:
 
     generator = AssemblyGenerator()  
     assembly_code = generator.assembly(graph) 
+    generator.print_stack()
     print("\n".join(assembly_code))
 except SyntaxError as e:
     print(f"Syntax error in parsing: {e}")
