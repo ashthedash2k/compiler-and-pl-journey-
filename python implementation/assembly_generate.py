@@ -55,38 +55,37 @@ class AssemblyGenerator:
         for item in reversed(self.stack):
             print(item)
 
-    def assembly(self, node):
+    def assembly(self, node, target_reg=None):
         asm = []
         if node is None:
             return asm
 
         if isinstance(node.value, int):
-            reg = self.get_register()
-            asm.append(f"mov {reg}, {node.value}")
-        elif node.value in ['PLUS', 'MINUS', 'MULT', 'DIV']:
+            if target_reg is None:
+                reg = self.get_register()
+                asm.append(f"mov {reg}, {node.value}")
+            else:
+                asm.append(f"add {target_reg}, {node.value}")
+        elif node.value in ['PLUS', 'MULT']:  # Commutative operations
+            if target_reg is None:
+                target_reg = self.get_register()
+
+            if node.is_commutative and isinstance(node.right.value, int):
+                node.left, node.right = node.right, node.left
+
             if node.left:
-                left_asm = self.assembly(node.left)
+                left_asm = self.assembly(node.left, target_reg)
                 asm.extend(left_asm)
-                left_reg = self.used_registers[-1]
-            else:
-                raise Exception("Missing left operand")
-
+            
             if node.right:
-                right_asm = self.assembly(node.right)
+                right_asm = self.assembly(node.right, target_reg)
                 asm.extend(right_asm)
-                right_reg = self.used_registers[-1]
-            else:
-                raise Exception("Missing right operand")
 
-            asm.append(self.push_to_stack(right_reg))
-            self.release_register(right_reg)
-
-            if node.value == 'PLUS':
-                asm.append(f"add {left_reg}, [rsp]")  
-
-            asm.append(self.pop_from_stack(right_reg)) 
+            if target_reg not in self.used_registers:
+                self.release_register(target_reg)
 
         return asm
+
 
 data = "(5 + 2) + (6 + 7)"
 lexer = Lexer(data)

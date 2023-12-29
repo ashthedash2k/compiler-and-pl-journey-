@@ -21,10 +21,11 @@ Structure of the Parser
 - recursive
 '''
 class Node:
-    def __init__(self, value, left=None, right=None):
+    def __init__(self, value, left=None, right=None, is_commutative=None):
         self.value = value  
         self.left = left   
-        self.right = right  
+        self.right = right
+        self.is_commutative = is_commutative
     
     def print_tree(self, level=0, prefix=""):
         indent = "    " * level
@@ -61,8 +62,10 @@ class Parser:
         while self.current_token:
             if self.current_token[0] in ['PLUS', 'MINUS']:
                 op = self.current_token[0]
+                # Set is_commutative to True for addition
+                is_commutative = op == 'PLUS'
                 self.next_token()
-                node = Node(op, node, self.mult_div())
+                node = Node(op, node, self.mult_div(), is_commutative=is_commutative)
             elif self.current_token[0] in ['GREATER THAN', 'LESS THAN', 'GREATER THAN EQUAL', 'LESS THAN EQUAL']:
                 return self.compare(node)
             else:
@@ -73,9 +76,11 @@ class Parser:
         node = self.breakdown()
         while self.current_token and self.current_token[0] in ['MULT', 'DIV']:
             op = self.current_token[0]
+            # Set is_commutative to True for multiplication
+            is_commutative = op == 'MULT'
             self.next_token()
             right_node = self.breakdown()
-            node = Node(op, node, right_node)
+            node = Node(op, node, right_node, is_commutative=is_commutative)
         return node
 
     def breakdown(self):
