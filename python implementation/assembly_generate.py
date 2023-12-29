@@ -1,10 +1,12 @@
 from parser import * 
+from lexer import *
 
 class AssemblyGenerator:
     def __init__(self):
         self.registers = ['rax', 'rbx', 'rcx', 'rdx', 'rsi', 'rdi', 'r8', 'r9']  
         self.used_registers = []  
-        self.stack = []  
+        self.stack = []
+        self.stack_offset = 0
 
     def get_register(self):
         if self.registers:
@@ -28,8 +30,7 @@ class AssemblyGenerator:
             return spill_reg
         else:
             raise Exception("No registers to spill")
-
-
+        
     def assembly(self, node):
         asm = []
         if node is None:
@@ -85,3 +86,4 @@ try:
     print("\n".join(assembly_code))
 except SyntaxError as e:
     print(f"Syntax error in parsing: {e}")
+

@@ -1,10 +1,24 @@
 
 '''
-TO ADD: 
+lexer.py
+@author Ashley C
+github: https://github.com/ashthedash2k
+email: aczumak@andrew.cmu.edu
+
+This is the compilers lexer, which can currently classify the following tokens: 
+- integers
+- floats
+- sequences of characters
+- artihmetic 
+- boolean comparrisons 
+
+Features to be implemented: 
 - multi line comments
 - line and column tracking
-- lol comment and add some like header explaining ur code 
+- keywords 
+- more error handling
 '''
+
 class Lexer:
     def __init__(self, input_data):
         self.input = input_data

@@ -1,4 +1,25 @@
-from lexer import Lexer
+
+'''
+parser.py
+@author Ashley C
+github: https://github.com/ashthedash2k
+email: aczumak@andrew.cmu.edu
+
+This is the compilers parser, which can currently parse the following:
+- basic arithmetic (with BEDMAS)
+- boolean comparrison 
+
+What needs to be implemented: 
+- floats
+- functions 
+- bools
+- conditions
+
+Structure of the Parser
+- Using AST graph 
+- print tree methods to understand the parsing sequence
+- recursive
+'''
 class Node:
     def __init__(self, value, left=None, right=None):
         self.value = value  
