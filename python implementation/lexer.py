@@ -41,6 +41,9 @@ class Lexer:
             #print(f"Processing character: {char}")
             if char in [' ', '\t', '\n', '\r']:
                 self.position += 1
+            elif char == '\n':  
+                self.tokens.append(('NEWLINE', char))
+                self.position += 1
             elif char in ['"', "'"]: 
                 string_value = self.read_string(char)
                 self.tokens.append(('STRING', string_value))
@@ -158,7 +161,9 @@ class Lexer:
             self.position += 1
         return self.input[start_position:self.position]
 
-data = 'string ok = "hey"'
+data = '''int a = 5
+string b = "hello"
+float c = 3.14'''
 lexer = Lexer(data)
 tokens = lexer.tokenize()
 print(tokens)
