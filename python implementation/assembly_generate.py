@@ -3,8 +3,7 @@ from lexer import *
 
 class AssemblyGenerator:
     def __init__(self):
-        self.registers = ['rax', 'rbx', 'rcx', 'rdx', 'rsi', 'rdi', 'rsp', 'r8', 'r9']  
-        #self.registers_32_bit = ['eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp']
+        self.registers = ['eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp', 'ebp', 'r8d', 'r9d']  
         self.used_registers = []  
         self.stack = []
         self.stack_offset = 0
@@ -31,57 +30,46 @@ class AssemblyGenerator:
             return spill_reg
         else:
             raise Exception("No registers to spill")
-        
-    
-    def push_to_stack(self, reg):
-        self.stack.append(reg)
-        return f"push {reg}"
 
-    def pop_from_stack(self, reg):
-        self.stack.remove(reg)
-        return f"pop {reg}"
-
-    def increase_rsp(self, value):
-        return f"add rsp, {value}"
-
-    def decrease_rsp(self, value):
-        return f"sub rsp, {value}"
-    
-    def print_stack(self):
-        if not self.stack:
-            print("Stack is empty.")
-            return
-
-        print("Stack contents (top to bottom):")
-        for item in reversed(self.stack):
-            print(item)
-
-    def assembly(self, node, target_reg='rax', operation=None):
+    def assembly(self, node, target_reg=None):
         asm = []
         if node is None:
-            return asm
+            return asm, None
 
         if isinstance(node.value, int):
-            # First integer initializes the target register
-            if operation is None:
-                asm.append(f"mov {target_reg}, {node.value}")
-            else:
-                if operation == 'PLUS':
-                    asm.append(f"add {target_reg}, {node.value}")
-                elif operation == 'MULT':
-                    asm.append(f"mul {target_reg}, {node.value}")
+            reg = self.get_register() if target_reg is None else target_reg
+            asm.append(f"mov {reg}, {node.value}")
+            return asm, reg
+
+        if node.value in ['PLUS', 'MULT']:
+            left_asm, left_reg = self.assembly(node.left)
+            right_asm, right_reg = self.assembly(node.right)
+
+            asm += left_asm
+            asm.append(f"push {left_reg}")  
+            asm += right_asm
+
+            asm.append(f"pop {left_reg}")   
+            if node.value == 'PLUS':
+                asm.append(f"add {left_reg}, {right_reg}")
+            elif node.value == 'MULT':
+                asm.append(f"imul {left_reg}, {right_reg}")
+
+            self.release_register(right_reg)
+            return asm, left_reg
+
+        return asm, None
+
+def flatten(lst):
+    flat_list = []
+    for item in lst:
+        if isinstance(item, list):
+            flat_list.extend(flatten(item)) 
         else:
-            # Update the operation if current node is an operation
-            if node.value in ['PLUS', 'MULT']:
-                operation = node.value
+            flat_list.append(item) 
+    return flat_list
 
-            # Process left and right operands
-            if node.left:
-                asm += self.assembly(node.left, target_reg, operation)
-            if node.right:
-                asm += self.assembly(node.right, target_reg, operation)
 
-        return asm
 
 data = "(5 * 2) + (1 * 7)"
 lexer = Lexer(data)
@@ -95,10 +83,10 @@ try:
     print(f"Parser returns: {result}")
     print(f'Symbol table values: {parser.symbol_table}')
 
-    generator = AssemblyGenerator()  
-    assembly_code = generator.assembly(graph) 
-    generator.print_stack()
+    generator = AssemblyGenerator()
+    assembly_code, _ = generator.assembly(graph)
+    assembly_code = flatten(assembly_code) 
+    print(assembly_code)
     print("\n".join(assembly_code))
 except SyntaxError as e:
     print(f"Syntax error in parsing: {e}")
-
