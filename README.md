@@ -1,2 +1,11 @@
 # compiler-and-pl-journey-
-The end goal is to build a compiler, but right now I'm just exploring the individual parts to eventually get there. So this repo is a bunch of mini projects to get towards my goal. Will update the readme as I go.
+Bootstrapping a compiler in python. Will compile static python (I am enforcing types). Will update as I go along.<br>
+
+# Currently implemented:
+- lexing
+- parsing and ast for BEDMAS
+- assembly for BEDMAS
+
+# Current Next steps
+- ast for variables
+- BEDMAS static ints, adding strings
