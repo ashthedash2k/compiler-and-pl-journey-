@@ -3,7 +3,8 @@ from lexer import *
 
 class AssemblyGenerator:
     def __init__(self):
-        self.registers = ['rax', 'rbx', 'rcx', 'rdx', 'rsi', 'rdi', 'r8', 'r9']  
+        self.registers = ['rax', 'rbx', 'rcx', 'rdx', 'rsi', 'rdi', 'rsp', 'r8', 'r9']  
+        #self.registers_32_bit = ['eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'esp']
         self.used_registers = []  
         self.stack = []
         self.stack_offset = 0
@@ -55,39 +56,34 @@ class AssemblyGenerator:
         for item in reversed(self.stack):
             print(item)
 
-    def assembly(self, node, target_reg=None):
+    def assembly(self, node, target_reg='rax', operation=None):
         asm = []
         if node is None:
             return asm
 
         if isinstance(node.value, int):
-            if target_reg is None:
-                reg = self.get_register()
-                asm.append(f"mov {reg}, {node.value}")
+            # First integer initializes the target register
+            if operation is None:
+                asm.append(f"mov {target_reg}, {node.value}")
             else:
-                asm.append(f"add {target_reg}, {node.value}")
-        elif node.value in ['PLUS', 'MULT']:  # Commutative operations
-            if target_reg is None:
-                target_reg = self.get_register()
+                if operation == 'PLUS':
+                    asm.append(f"add {target_reg}, {node.value}")
+                elif operation == 'MULT':
+                    asm.append(f"mul {target_reg}, {node.value}")
+        else:
+            # Update the operation if current node is an operation
+            if node.value in ['PLUS', 'MULT']:
+                operation = node.value
 
-            if node.is_commutative and isinstance(node.right.value, int):
-                node.left, node.right = node.right, node.left
-
+            # Process left and right operands
             if node.left:
-                left_asm = self.assembly(node.left, target_reg)
-                asm.extend(left_asm)
-            
+                asm += self.assembly(node.left, target_reg, operation)
             if node.right:
-                right_asm = self.assembly(node.right, target_reg)
-                asm.extend(right_asm)
-
-            if target_reg not in self.used_registers:
-                self.release_register(target_reg)
+                asm += self.assembly(node.right, target_reg, operation)
 
         return asm
 
-
-data = "(5 + 2) + (6 + 7)"
+data = "(5 * 2) + (1 * 7)"
 lexer = Lexer(data)
 tokens = lexer.tokenize()
 parser = Parser(tokens)

@@ -20,6 +20,7 @@ Features to be implemented:
 '''
 
 class Lexer:
+    static_types = ['string', 'float', 'int']
     def __init__(self, input_data):
         self.input = input_data
         self.position = 0
@@ -96,16 +97,24 @@ class Lexer:
                 self.tokens.append((token_type, number_value))
             elif char.isalpha() or char == '_':
                 identifier = self.read_identifier()
-                if identifier in self.keywords:
+                if identifier in self.static_types:
+                    self.tokens.append((f'TYPE_{identifier.upper()}', identifier))
+                    self.skip_whitespace()
+                    if self.position < len(self.input) and (self.input[self.position].isalpha() or self.input[self.position] == '_'):
+                        var_name = self.read_identifier()
+                        self.tokens.append(('VARIABLE', var_name))
+                elif identifier in self.keywords:
                     self.tokens.append((self.keywords[identifier], identifier))
                 elif identifier in self.logic:
                     self.tokens.append((self.logic[identifier], identifier))
                 else: 
-                    self.tokens.append(('STRING', identifier))
+                    self.tokens.append(('IDENTIFIER', identifier))
+
             else:
                 raise ValueError("cannot parse: ", char)
+
         return self.tokens
-    
+        
     def read_identifier(self):
         start_position = self.position
         while self.position < len(self.input) and (self.input[self.position].isalnum()):
@@ -128,6 +137,20 @@ class Lexer:
                 break
         return self.input[start_position:self.position]
     
+    def read_string(self, quote_type):
+        self.position += 1 
+        start_position = self.position
+        while self.position < len(self.input) and self.input[self.position] != quote_type:
+            self.position += 1
+        string_literal = self.input[start_position:self.position]
+        self.position += 1 
+        return string_literal
+    
+    def skip_whitespace(self):
+        while self.position < len(self.input) and self.input[self.position] in [' ', '\t', '\n', '\r']:
+            self.position += 1
+
+    
     #single line comments
     def read_sl_comment(self):
         start_position = self.position
@@ -135,7 +158,7 @@ class Lexer:
             self.position += 1
         return self.input[start_position:self.position]
 
-# data = 'cat '
-# lexer = Lexer(data)
-# tokens = lexer.tokenize()
-# print(tokens)
+data = 'string ok = "hey"'
+lexer = Lexer(data)
+tokens = lexer.tokenize()
+print(tokens)
